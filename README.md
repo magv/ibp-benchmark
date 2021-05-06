@@ -2,7 +2,7 @@
 **How to choose IBPs topologies**
 
 Idea:
-come up with some insights on how to choose IBPs topologies 
+* come up with some insights on how to choose IBPs topologies 
 
 Summary:
 1) to run the actual IBPs for a chosen topology (like a box)
