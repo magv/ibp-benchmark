@@ -1,5 +1,5 @@
 
-- How to choose IBPs topologies -
+**How to choose IBPs topologies**
 
 Idea:
 come up with some insights on how to choose IBPs topologies 
