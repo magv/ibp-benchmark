@@ -74,7 +74,7 @@ def measure(p, t0):
 if __name__ == "__main__":
     outfile = "comon.json"
     interval = 10
-    opts, args = getopt.gnu_getopt(sys.argv[1:], "hi:o:")
+    opts, args = getopt.getopt(sys.argv[1:], "hi:o:")
     for opt, val in opts:
         if opt == "-h": usage(sys.stdout); exit(0)
         if opt == "-i": interval = int(val)
@@ -90,6 +90,7 @@ if __name__ == "__main__":
         outf.write(",\n  ".join(json.dumps(c) for c in measure_columns()))
         outf.write("\n ],\n")
         outf.write(" \"series\": [\n")
+        delimiter = ""
         while True:
             now = time.time()
             stat = []
@@ -104,9 +105,11 @@ if __name__ == "__main__":
             except psutil.AccessDenied:
                 print("comon: No access to the main process; it probably finished", file=sys.stderr)
                 pass
+            outf.write(delimiter)
+            delimiter = ",\n"
             outf.write(f"  {{\"time\": {now-t0}, \"processes\": [\n   ")
             outf.write(",\n   ".join(json.dumps(st) for st in stat))
-            outf.write("\n  ]}},\n")
+            outf.write("\n  ]}")
             outf.flush()
             tnext += interval
             try:
@@ -115,7 +118,7 @@ if __name__ == "__main__":
             except subprocess.TimeoutExpired:
                 pass
         duration = time.time() - t0
-        outf.write(" ],\n")
+        outf.write("\n ],\n")
         outf.write(f" \"exitcode\": {proc.returncode},\n")
         outf.write(f" \"time\": {duration}\n")
         outf.write("}\n")

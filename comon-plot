@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+
+import getopt
+import json
+import os
+import sys
+
+def usage(file):
+    file.write("""Usage: comon-plot comon.json [column] ...\n""")
+
+if __name__ == "__main__":
+
+    if len(sys.argv) < 2:
+        usage(sys.stderr)
+        exit(1)
+
+    filename = sys.argv[1]
+    columns = sys.argv[2:] or ["mem_proportional"]
+
+    with open(filename, "r") as f:
+        data = json.load(f)
+
+    if any(c not in data["columns"] for c in columns):
+        print("Can't find the specified columns; the available ones are:")
+        for c in data["columns"]:
+            print("-", c)
+        exit(1)
+
+    column2index = {name:i for i,name in enumerate(data["columns"])}
+    indices = [column2index[c] for c in columns]
+    c_pid = column2index["pid"]
+    c_name = column2index["name"]
+
+    pid_names = sorted(set((p[c_pid], p[c_name]) for point in data["series"] for p in point["processes"]))
+    pid2name = dict(pid_names)
+    pids = [p for p, n in pid_names]
+
+    totals = []
+    pid2values = {pid: [] for pid in pids}
+    for point in data["series"]:
+        values = {pid: 0 for pid in pids}
+        total = 0
+        for p in point["processes"]:
+            for idx in indices:
+                values[p[c_pid]] += p[idx]
+                total += p[idx]
+        for pid, value in values.items():
+            pid2values[pid].append(value)
+        totals.append(total)
+
+    print("Value:", "+".join(columns))
+    print("Maximum:")
+    for pid, values in pid2values.items():
+        print(f"- {pid2name[pid]:15} {max(values):,d}")
+    print(f"Combined maximum: {max(totals):,d}")
+
+    os.environ["MPLBACKEND"] = "TKAgg"
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+    times = [point["time"] for point in data["series"]]
+    ax.stackplot(times, [pid2values[p] for p in pids], labels=[n for p, n in pid_names])
+    ax.legend(loc="upper left")
+    ax.set_title(" + ".join(columns))
+    ax.set_xlabel("Time, s")
+    plt.show()
