@@ -74,10 +74,10 @@ def measure(p, t0):
 if __name__ == "__main__":
     outfile = "comon.json"
     interval = 10
-    opts, args = getopt.getopt(sys.argv[1:], "hi:o:")
+    opts, args = getopt.getopt(sys.argv[1:], "ht:o:")
     for opt, val in opts:
         if opt == "-h": usage(sys.stdout); exit(0)
-        if opt == "-i": interval = int(val)
+        if opt == "-t": interval = float(val)
         if opt == "-o": outfile = val
     t0 = tnext = time.time()
     proc = subprocess.Popen(args)
