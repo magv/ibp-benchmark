@@ -1,0 +1,122 @@
+#!/usr/bin/python3
+
+# COmmand MONitor executes a command and saves its statistics
+# over time (i.e. memory and cpu usage), recursively for all
+# of its child processes.
+
+import psutil
+import subprocess
+import getopt
+import time
+import sys
+import os
+import json
+
+def usage(file):
+    file.write("""\
+Usage: comon [-h] [-t sec] [-o path] command ...
+Options:
+    -t sec      Measure the statistics every sec seconds (default: 10).
+    -o path     Save the statistics to this file (default: comon.json).
+    -h          Show this help message.
+Arguments:
+    command     Command to run and monitor.
+""")
+
+def measure_columns():
+    return [
+        "pid",
+        "name",
+        "ctime",
+        "status",
+        "cpu_user",
+        "cpu_system",
+        "cpu_percent",
+        "threads",
+        "mem_resident",
+        "mem_virtual",
+        "mem_shared",
+        "mem_unique",
+        "mem_proportional",
+        "mem_swap",
+        "io_nread",
+        "io_nwrite",
+        "io_read",
+        "io_write"
+    ]
+
+def measure(p, t0):
+    with p.oneshot():
+        cpu = p.cpu_times()
+        mem = p.memory_full_info()
+        ioc = p.io_counters()
+        return [
+            p.pid,
+            p.name(),
+            p.create_time() - t0,
+            p.status(),
+            cpu.user,
+            cpu.system,
+            p.cpu_percent(),
+            p.num_threads(),
+            mem.rss,
+            mem.vms,
+            mem.shared,
+            mem.uss,
+            mem.pss,
+            mem.swap,
+            ioc.read_count,
+            ioc.write_count,
+            ioc.read_bytes + ioc.read_chars,
+            ioc.write_bytes + ioc.write_chars
+        ]
+
+if __name__ == "__main__":
+    outfile = "comon.json"
+    interval = 10
+    opts, args = getopt.gnu_getopt(sys.argv[1:], "hi:o:")
+    for opt, val in opts:
+        if opt == "-h": usage(sys.stdout); exit(0)
+        if opt == "-i": interval = int(val)
+        if opt == "-o": outfile = val
+    t0 = tnext = time.time()
+    proc = subprocess.Popen(args)
+    p = psutil.Process(proc.pid)
+    ctime0 = p.create_time()
+    with open(outfile, "w", 8*1024) as outf:
+        outf.write("{\n")
+        outf.write(f" \"command\": {json.dumps(args)},\n")
+        outf.write(" \"columns\": [\n  ")
+        outf.write(",\n  ".join(json.dumps(c) for c in measure_columns()))
+        outf.write("\n ],\n")
+        outf.write(" \"series\": [\n")
+        while True:
+            now = time.time()
+            stat = []
+            try:
+                stat.append(measure(p, ctime0))
+                for c in p.children(recursive=True):
+                    try:
+                        stat.append(measure(c, ctime0))
+                    except psutil.AccessDenied:
+                        print("comon: No access to a child process; it probably finished", file=sys.stderr)
+                        pass
+            except psutil.AccessDenied:
+                print("comon: No access to the main process; it probably finished", file=sys.stderr)
+                pass
+            outf.write(f"  {{\"time\": {now-t0}, \"processes\": [\n   ")
+            outf.write(",\n   ".join(json.dumps(st) for st in stat))
+            outf.write("\n  ]}},\n")
+            outf.flush()
+            tnext += interval
+            try:
+                proc.wait(timeout=tnext - time.time())
+                break
+            except subprocess.TimeoutExpired:
+                pass
+        duration = time.time() - t0
+        outf.write(" ],\n")
+        outf.write(f" \"exitcode\": {proc.returncode},\n")
+        outf.write(f" \"time\": {duration}\n")
+        outf.write("}\n")
+        print(f"comon: Exited with code {proc.returncode} in {duration:.1f} seconds", file=sys.stderr)
