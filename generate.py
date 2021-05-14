@@ -137,3 +137,4 @@ problem = Problem(
 )
 
 format_template_dir("template.kira", "box1L.kira", p=problem)
+format_template_dir("template.fire", "box1L.fire", p=problem)
