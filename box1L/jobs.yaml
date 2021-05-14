@@ -8,3 +8,6 @@ jobs:
        run_initiate: true
        run_triangular: true
        run_back_substitution: true
+  - kira2math:
+       target:
+        - {topologies: [box], sectors: [15], r: 6, s: 2}
