@@ -1,13 +1,13 @@
 jobs:
   - reduce_sectors:
        reduce:
-       - {r: 6, s: 2}
+       - {{r: {p.maxr}, s: {p.maxs}}}
        select_integrals:
-        select_mandatory_recursively:
-        - {r: 6, s: 2} 
+        select_mandatory_list:
+         - [basis, "integrals"]
        run_initiate: true
        run_triangular: true
        run_back_substitution: true
   - kira2math:
        target:
-        - {topologies: [box], sectors: [15], r: 6, s: 2}
+         - [basis, "integrals"]
