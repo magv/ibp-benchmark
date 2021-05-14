@@ -1,0 +1,11 @@
+Off[FrontEndObject::notavail];
+FIREPATH = Environment["FIREPATH"];
+THISDIR = Directory[];
+SetDirectory[FIREPATH];
+Get["FIRE6.m"];
+LoadStart[THISDIR <> "/basisx"];
+Print["* TransformRules[]"];
+TransformRules[THISDIR <> "/basisx.litered", THISDIR <> "/basisx.lbases", 1];
+Print["* SaveSBases[]"];
+SaveSBases[THISDIR <> "/basisx"];
+Print["* Done"];

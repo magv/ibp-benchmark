@@ -102,7 +102,7 @@ if __name__ == "__main__":
                     except psutil.AccessDenied:
                         print("comon: No access to a child process; it probably finished", file=sys.stderr)
                         pass
-            except psutil.AccessDenied:
+            except (psutil.AccessDenied, psutil.NoSuchProcess):
                 print("comon: No access to the main process; it probably finished", file=sys.stderr)
                 pass
             outf.write(delimiter)
