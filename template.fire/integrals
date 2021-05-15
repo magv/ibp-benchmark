@@ -1,6 +1,6 @@
 {{
 #% for indices in p.integrals[:-1]:
- {{1, {{ {",".join(str(i) for i in indices)} }}}},
+ {{1, {{{",".join(str(i) for i in indices)}}}}},
 #% indices = p.integrals[-1]
- {{1, {{ {",".join(str(i) for i in indices)} }}}}
+ {{1, {{{",".join(str(i) for i in indices)}}}}}
 }}
