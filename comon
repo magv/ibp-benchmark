@@ -14,10 +14,11 @@ import json
 
 def usage(file):
     file.write("""\
-Usage: comon [-h] [-t sec] [-o path] command ...
+Usage: comon [-h] [-t sec] [-C dir] [-o path] command ...
 Options:
     -t sec      Measure the statistics every sec seconds (default: 10).
     -o path     Save the statistics to this file (default: comon.json).
+    -C dir      Change to this directory before doing anything.
     -h          Show this help message.
 Arguments:
     command     Command to run and monitor.
@@ -73,12 +74,16 @@ def measure(p, t0):
 
 if __name__ == "__main__":
     outfile = "comon.json"
+    chdir = None
     interval = 10
-    opts, args = getopt.getopt(sys.argv[1:], "ht:o:")
+    opts, args = getopt.getopt(sys.argv[1:], "ht:o:C:")
     for opt, val in opts:
         if opt == "-h": usage(sys.stdout); exit(0)
         if opt == "-t": interval = float(val)
         if opt == "-o": outfile = val
+        if opt == "-C": chdir = val
+    if chdir is not None:
+        os.chdir(chdir)
     t0 = tnext = time.time()
     proc = subprocess.Popen(args)
     p = psutil.Process(proc.pid)

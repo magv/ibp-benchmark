@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# This script copies a directory into $TMP (presumably the fast
+# local disk), executes the "run.sh" inside that directory under
+# the command monitor (comon), and saves the statistics file back
+# into the original directory.
+
+if [ "$#" -le 0 ]; then
+    echo "usage: $0 dir ..." 1>&2
+    exit 1
+fi
+for dir in "$@"; do
+    if [ ! -d "$dir" ]; then
+        echo "$0: can't find directory '$dir'" 1>&2
+        exit 1
+    fi
+    tmpdir=$(mktemp -d)
+    echo "# directory: $tmpdir"
+    cp -a "$dir/." "$tmpdir"
+    ./comon -C "$tmpdir" -t1 -o "comon.json" "./run.sh"
+    cp "$tmpdir/comon.json" "$dir/"
+    rm -rf "$tmpdir"
+done

@@ -112,6 +112,7 @@ def format_template_dir(srcdir, dstdir, **kwargs):
             ensure_directory(os.path.dirname(dst))
             with open(dst, "w") as f:
                 f.write(data)
+            os.chmod(dst, os.stat(src).st_mode)
 
 # one loop box with massive internal lines (same mass)
 # and massless external legs
@@ -133,7 +134,7 @@ problem = Problem(
         ("l - p1 - p3", "m2"),
         ("l - p1", "m2")
     ],
-    integrals = all_indices(4, rmax=4, smax=2, dmax=1)
+    integrals = all_indices(4, rmax=6, smax=2, dmax=2)
 )
 
 format_template_dir("template.kira", "box1L.kira", p=problem)
