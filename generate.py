@@ -134,8 +134,9 @@ problem = Problem(
         ("l - p1 - p3", "m2"),
         ("l - p1", "m2")
     ],
-    integrals = all_indices(4, rmax=6, smax=2, dmax=2)
+    integrals = all_indices(4, rmax=10, smax=5, dmax=5)
 )
 
 format_template_dir("template.kira", "box1L.kira", p=problem)
 format_template_dir("template.fire", "box1L.fire", p=problem)
+format_template_dir("template.fire-nohint", "box1L.fire-nohint", p=problem)
