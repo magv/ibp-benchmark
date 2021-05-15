@@ -21,6 +21,7 @@ $MATH -script step3.m || exit 1
 
 mkdir fire.hintdir
 $FIREPATH/bin/FIRE6p -c fire.hint || exit 1
+rm -rf fire.hint.database
 $FIREPATH/bin/FIRE6 -c fire || exit 1
 
 $MATH -script step4.m || exit 1

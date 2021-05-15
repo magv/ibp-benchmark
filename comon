@@ -14,11 +14,12 @@ import json
 
 def usage(file):
     file.write("""\
-Usage: comon [-h] [-t sec] [-C dir] [-o path] command ...
+Usage: comon [-h] [-C dir] [-d dir] [-o path] [-t sec] command ...
 Options:
-    -t sec      Measure the statistics every sec seconds (default: 10).
-    -o path     Save the statistics to this file (default: comon.json).
     -C dir      Change to this directory before doing anything.
+    -d dir      Measure the size of the files in this directory too.
+    -o path     Save the statistics to this file (default: comon.json).
+    -t sec      Measure the statistics every sec seconds (default: 10).
     -h          Show this help message.
 Arguments:
     command     Command to run and monitor.
@@ -72,13 +73,28 @@ def measure(p, t0):
             ioc.write_bytes + ioc.write_chars
         ]
 
+def directory_size(dirname):
+    size = 0
+    try:
+        scan = os.scandir(dirname)
+    except (PermissionError, FileNotFoundError):
+        return 0
+    for entry in scan:
+        if entry.is_file(follow_symlinks=False):
+            size += entry.stat(follow_symlinks=False).st_size
+        if entry.is_dir(follow_symlinks=False):
+            size += directory_size(entry.path)
+    return size
+
 if __name__ == "__main__":
     outfile = "comon.json"
     chdir = None
     interval = 10
-    opts, args = getopt.getopt(sys.argv[1:], "ht:o:C:")
+    directory = None
+    opts, args = getopt.getopt(sys.argv[1:], "hd:t:o:C:")
     for opt, val in opts:
         if opt == "-h": usage(sys.stdout); exit(0)
+        if opt == "-d": directory = val
         if opt == "-t": interval = float(val)
         if opt == "-o": outfile = val
         if opt == "-C": chdir = val
@@ -95,7 +111,6 @@ if __name__ == "__main__":
         outf.write(",\n  ".join(json.dumps(c) for c in measure_columns()))
         outf.write("\n ],\n")
         outf.write(" \"series\": [\n")
-        delimiter = ""
         while True:
             now = time.time()
             stat = []
@@ -105,16 +120,15 @@ if __name__ == "__main__":
                     try:
                         stat.append(measure(c, ctime0))
                     except psutil.AccessDenied:
-                        print("comon: No access to a child process; it probably finished", file=sys.stderr)
+                        #print("comon: No access to a child process; it probably finished", file=sys.stderr)
                         pass
             except (psutil.AccessDenied, psutil.NoSuchProcess):
                 print("comon: No access to the main process; it probably finished", file=sys.stderr)
                 pass
-            outf.write(delimiter)
-            delimiter = ",\n"
-            outf.write(f"  {{\"time\": {now-t0}, \"processes\": [\n   ")
+            disk = directory_size(directory) if directory is not None else "null"
+            outf.write(f"  {{\"time\": {now-t0}, \"disk\": {disk}, \"processes\": [\n   ")
             outf.write(",\n   ".join(json.dumps(st) for st in stat))
-            outf.write("\n  ]}")
+            outf.write("\n  ]},\n")
             outf.flush()
             tnext += interval
             try:
@@ -123,7 +137,9 @@ if __name__ == "__main__":
             except subprocess.TimeoutExpired:
                 pass
         duration = time.time() - t0
-        outf.write("\n ],\n")
+        disk = directory_size(directory) if directory is not None else 0
+        outf.write(f"  {{\"time\": {duration}, \"disk\": {disk}, \"processes\": []}}\n")
+        outf.write(f" ],\n")
         outf.write(f" \"exitcode\": {proc.returncode},\n")
         outf.write(f" \"time\": {duration}\n")
         outf.write("}\n")
