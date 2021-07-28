@@ -176,5 +176,6 @@ problem = Problem(
 )
 
 format_template_dir("template.kira", "box1L.kira", p=problem)
+format_template_dir("template.kira-firefly", "box1L.kira-firefly", p=problem)
 format_template_dir("template.fire", "box1L.fire", p=problem)
 format_template_dir("template.fire-nohint", "box1L.fire-nohint", p=problem)

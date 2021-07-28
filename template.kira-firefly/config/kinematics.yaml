@@ -1,0 +1,15 @@
+kinematics:
+  incoming_momenta:
+#% for m in p.external_momenta:
+    - {m!r}
+#% pass
+  outgoing_momenta: []
+  kinematic_invariants:
+#% for k, v in p.invariants.items():
+    - [{k!r}, {v!r}] 
+#% pass
+  scalarproduct_rules:
+#% for p1, p2, v in p.scalar_product_rules:
+    - [[{p1!r}, {p2!r}], {v!r}]
+#% pass
+  symbol_to_replace_by_one: "{p.replace_by_one}"
