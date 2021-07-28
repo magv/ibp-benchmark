@@ -179,3 +179,44 @@ format_template_dir("template.kira", "box1L.kira", p=problem)
 format_template_dir("template.kira-firefly", "box1L.kira-firefly", p=problem)
 format_template_dir("template.fire", "box1L.fire", p=problem)
 format_template_dir("template.fire-nohint", "box1L.fire-nohint", p=problem)
+
+# ttH b16
+problem = Problem(
+    external_momenta = "q1 q2 p1 p2",
+    loop_momenta = "l1 l2",
+    invariants = {"mt2": 2, "mh2": 2, "x12": 2, "x23": 2, "x35": 2, "x41": 2, "x54": 2},
+    replace_by_one = "mt2",
+    scalar_product_rules = [
+        ("p1", "p1", "mt2"),
+        ("p1", "p2", "mh2/2 - mt2 + x12/2 - x35/2 - x54/2"),
+        ("p1", "q1", "x12/2 + x23/2 - x54/2"),
+        ("p1", "q2", "-x23/2"),
+        ("p2", "p2", "mt2"),
+        ("p2", "q1", "-x41/2"),
+        ("p2", "q2", "x12/2 - x35/2 + x41/2"),
+        ("q1", "q1", "0"),
+        ("q1", "q2", "x12/2"),
+        ("q2", "q2", "0")
+    ],
+    denominators = [
+        ("l1", "0"),
+        ("l2 - p1", "0"),
+        ("l1 - q1", "0"),
+        ("l2", "mt2"),
+        ("l1 + p2 - q1", "mt2"),
+        ("l2 - q2", "mt2"),
+        ("l1 - l2 + q2", "mt2"),
+        ("l1 - p1 + q2", "mt2"),
+        ("l1 + q2", "0"),
+        ("l2 + q1", "0"),
+        ("l2 + p2", "0")
+    ],
+    integrals = all_indices(6, rmax=7, smax=1, dmax=1, sector=(1,0,1,1,1,0,1,1,0,0,0)),
+    top_sector = (1,0,1,1,1,0,1,1,0,0,0),
+    threads = 16
+)
+
+format_template_dir("template.kira", "tth_b16.kira", p=problem)
+format_template_dir("template.kira-firefly", "tth_b16.kira-firefly", p=problem)
+format_template_dir("template.fire", "tth_b16.fire", p=problem)
+format_template_dir("template.fire-nohint", "tth_b16.fire-nohint", p=problem)
