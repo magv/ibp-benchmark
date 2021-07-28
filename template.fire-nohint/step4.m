@@ -14,4 +14,4 @@ LoadFireTables[filename_, coeff_: Identity, JoinTerms_: True] := Module[{{temp, 
     Rule @@@ temp // ReplaceAll[G[bid_, idx_List] :> B[bid, Sequence @@ idx]]
  ]
 
-Put[LoadFireTables["basisx.tables"], "basisx.ibp-tables.m"];
+Put[LoadFireTables["basisx.tables"], "ibp-tables.m"];

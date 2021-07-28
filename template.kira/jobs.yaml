@@ -1,7 +1,7 @@
 jobs:
   - reduce_sectors:
        reduce:
-       - {{r: {p.maxr}, s: {p.maxs}}}
+       - {{topologies: [basis], sectors: [b{"".join("1" if s else "0" for s in p.top_sector)}], r: {p.maxr}, s: {p.maxs}}}
        select_integrals:
         select_mandatory_list:
          - [basis, "integrals"]
@@ -11,3 +11,4 @@ jobs:
   - kira2math:
        target:
          - [basis, "integrals"]
+       reconstruct_mass: false

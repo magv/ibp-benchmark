@@ -18,6 +18,7 @@ for dir in "$@"; do
     echo "# directory: $tmpdir"
     cp -a "$dir/." "$tmpdir"
     ./comon -C "$tmpdir" -t 1 -d . -o "comon.json" "./run.sh"
-    cp "$tmpdir/comon.json" "$dir/"
+    cp -a "$tmpdir/comon.json" "$dir/"
+    cp -a "$tmpdir/ibp-tables.m" "$dir/"
     rm -rf "$tmpdir"
 done

@@ -2,4 +2,6 @@
 
 rm -rf results/ sectormappings/ tmp/ kira.log
 
-kira --parallel=2 jobs.yaml
+kira --parallel={p.threads} jobs.yaml
+
+mv results/basis/kira_integrals.m ibp-tables.m

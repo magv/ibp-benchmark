@@ -12,5 +12,4 @@ kinematics:
 #% for p1, p2, v in p.scalar_product_rules:
     - [[{p1!r}, {p2!r}], {v!r}]
 #% pass
-#% sym = list(p.invariants.keys())[0]
-  symbol_to_replace_by_one: {sym}
+  symbol_to_replace_by_one: "{p.replace_by_one}"

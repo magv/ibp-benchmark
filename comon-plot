@@ -51,8 +51,8 @@ if __name__ == "__main__":
     print("Value:", "+".join(columns))
     print("Maximum:")
     for pid, values in pid2values.items():
-        print(f"- {pid2name[pid]:15} {max(values):,d}")
-    print(f"Combined maximum: {max(totals):,d}")
+        print(f"- {pid2name[pid]:15} {max(values):,f}")
+    print(f"Combined maximum: {max(totals):,f}")
 
     os.environ["MPLBACKEND"] = "TKAgg"
     import matplotlib.pyplot as plt

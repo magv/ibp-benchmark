@@ -10,13 +10,13 @@ Propagators = {{
     ({mom})^2 - {m2},
 #% pass
     Nothing
-}};
+}} /. {p.replace_by_one} -> 1;
 Replacements = {{
 #% for p1, p2, v in p.scalar_product_rules:
     {p1}*{p2} -> {v},
 #% pass
     Nothing
-}};
+}} /. {p.replace_by_one} -> 1;
 RESTRICTIONS = {{}};
 Print["* PrepareIBP[]"];
 PrepareIBP[];

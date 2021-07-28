@@ -18,7 +18,23 @@ def integer_partitions(n, min=1, maxsize=None):
 assert len(list(integer_partitions(3))) == 3
 assert len(list(integer_partitions(10))) == 42
 
-def all_indices(nindices, rmin=1, rmax=1, smin=0, smax=0, dmin=0, dmax=None):
+def indices_in_sector(indices, sector):
+    result = []
+    for idx in indices:
+        r = []
+        i = 0
+        for s in sector:
+            if s:
+                r.append(idx[i])
+                i += 1
+            else:
+                r.append(0)
+        result.append(tuple(r))
+    return result
+
+assert indices_in_sector([(1,2), (11,22)], (1,0,1,0)) == [(1,0,2,0), (11,0,22,0)]
+
+def all_indices(nindices, rmin=1, rmax=1, smin=0, smax=0, dmin=0, dmax=None, sector=None):
     result = []
     def ndots(indices):
         return sum(i-1 for i in indices if i > 1)
@@ -33,21 +49,28 @@ def all_indices(nindices, rmin=1, rmax=1, smin=0, smax=0, dmin=0, dmax=None):
                 if nzeros < 0: continue
                 for indices in set(itertools.permutations(i1+i2+(0,)*nzeros)):
                     result.append(indices)
+    if sector:
+        assert(sum(bool(s) for s in sector) == nindices)
+        result = indices_in_sector(result, sector)
     return sorted(result)
 
 assert len(all_indices(4, rmax=6, smax=0)) == 209
 assert len(all_indices(4, rmax=5, smax=0, dmax=1)) == 47
 
 class Problem:
-    def __init__(self, external_momenta, loop_momenta, invariants, scalar_product_rules, denominators, integrals):
+    def __init__(self, external_momenta, loop_momenta, invariants, replace_by_one, scalar_product_rules, denominators, integrals, top_sector, threads):
         def tolist(obj):
             return obj.split() if isinstance(obj, str) else obj
+        assert len(top_sector) == len(denominators)
         self.external_momenta = tolist(external_momenta)
         self.loop_momenta = tolist(loop_momenta)
         self.invariants = invariants
+        self.replace_by_one = replace_by_one
         self.scalar_product_rules = scalar_product_rules
         self.denominators = denominators
         self.integrals = integrals
+        self.top_sector = top_sector
+        self.threads = threads
 
     @property
     def maxr(self):
@@ -62,8 +85,20 @@ class Problem:
             default=0)
 
     @property
-    def top_sector(self):
+    def top_sector_id(self):
         return sum(2**i for i in range(len(self.denominators)))
+
+    @property
+    def top_sector_first(self):
+        i = 0
+        while i < len(self.top_sector) and not self.top_sector[i]: i+= 1
+        return i
+
+    @property
+    def top_sector_last(self):
+        i = len(self.top_sector) - 1
+        while i >= 0 and not self.top_sector[i]: i-= 1
+        return i
 
 def ensure_directory(path):
     try:
@@ -120,6 +155,7 @@ problem = Problem(
     external_momenta = "p1 p2 p3",
     loop_momenta = "l",
     invariants = {"m2": 2, "s12": 2, "s23": 2},
+    replace_by_one = "m2",
     scalar_product_rules = [
         ("p1", "p1", "0"),
         ("p2", "p2", "0"),
@@ -134,7 +170,9 @@ problem = Problem(
         ("l - p1 - p3", "m2"),
         ("l - p1", "m2")
     ],
-    integrals = all_indices(4, rmax=10, smax=5, dmax=5)
+    integrals = all_indices(4, rmax=10, smax=5, dmax=5),
+    top_sector = (1,1,1,1),
+    threads = 16
 )
 
 format_template_dir("template.kira", "box1L.kira", p=problem)
