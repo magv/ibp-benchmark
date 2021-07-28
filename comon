@@ -80,10 +80,13 @@ def directory_size(dirname):
     except (PermissionError, FileNotFoundError):
         return 0
     for entry in scan:
-        if entry.is_file(follow_symlinks=False):
-            size += entry.stat(follow_symlinks=False).st_size
-        if entry.is_dir(follow_symlinks=False):
-            size += directory_size(entry.path)
+        try:
+            if entry.is_file(follow_symlinks=False):
+                size += entry.stat(follow_symlinks=False).st_size
+            if entry.is_dir(follow_symlinks=False):
+                size += directory_size(entry.path)
+        except (PermissionError, FileNotFoundError):
+            pass
     return size
 
 if __name__ == "__main__":
