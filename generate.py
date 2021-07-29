@@ -58,7 +58,7 @@ assert len(all_indices(4, rmax=6, smax=0)) == 209
 assert len(all_indices(4, rmax=5, smax=0, dmax=1)) == 47
 
 class Problem:
-    def __init__(self, external_momenta, loop_momenta, invariants, replace_by_one, scalar_product_rules, denominators, integrals, top_sector, threads):
+    def __init__(self, external_momenta, loop_momenta, invariants, replace_by_one, scalar_product_rules, denominators, integrals, top_sector, preferred_masters=[], threads=1):
         def tolist(obj):
             return obj.split() if isinstance(obj, str) else obj
         assert len(top_sector) == len(denominators)
@@ -70,6 +70,7 @@ class Problem:
         self.denominators = denominators
         self.integrals = integrals
         self.top_sector = top_sector
+        self.preferred_masters = preferred_masters
         self.threads = threads
 
     @property

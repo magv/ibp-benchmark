@@ -1,0 +1,8 @@
+{{
+#% if p.preferred_masters:
+#%     for indices in p.preferred_masters[:-1]:
+ {{1, {{{",".join(str(i) for i in indices)}}}}},
+#%     indices = p.preferred_masters[-1]
+ {{1, {{{",".join(str(i) for i in indices)}}}}}
+#% pass
+}}

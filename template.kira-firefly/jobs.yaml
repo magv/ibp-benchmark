@@ -5,6 +5,9 @@ jobs:
        select_integrals:
         select_mandatory_list:
          - [basis, "integrals"]
+#% if p.preferred_masters:
+       preferred_masters: "preferred-masters"
+#% pass
        run_initiate: true
        run_triangular: false
        run_back_substitution: false
