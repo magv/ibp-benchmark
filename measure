@@ -17,8 +17,9 @@ for dir in "$@"; do
     tmpdir=$(mktemp -d)
     echo "# directory: $tmpdir"
     cp -a "$dir/." "$tmpdir"
-    ./comon -C "$tmpdir" -t 1 -d . -o "comon.json" "./run.sh"
+    ./comon -C "$tmpdir" -t 3 -d . -o "comon.json" "./run.sh" 2>&1 | tee "$tmpdir/log"
     cp -a "$tmpdir/comon.json" "$dir/"
     cp -a "$tmpdir/ibp-tables.m" "$dir/"
+    cp -a "$tmpdir/log" "$dir/"
     rm -rf "$tmpdir"
 done
