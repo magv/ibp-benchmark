@@ -59,13 +59,21 @@ Do[
   ex1 = integral /. table1;
   ex2 = integral /. table2 /. table1;
   If[Not[MemberQ[table1 // Keys, integral] || MemberQ[masters1, integral]],
-    Print["! Integral ", integral, " is missing from table 1"];
-    nerrors += 1;
+    If[table2[integral] === 0,
+      Print["~ Integral ", integral, " is missing from table 1, but is zero"];
+      ,
+      Print["! Integral ", integral, " is missing from table 1"];
+      nerrors += 1;
+    ];
     Continue[];
   ];
   If[Not[MemberQ[table2 // Keys, integral] || MemberQ[masters2, integral]],
-    Print["! Integral ", integral, " is missing from table 2"];
-    nerrors += 1;
+    If[table1[integral] === 0,
+      Print["~ Integral ", integral, " is missing from table 2, but is zero"];
+      ,
+      Print["! Integral ", integral, " is missing from table 2"];
+      nerrors += 1;
+    ];
     Continue[];
   ];
   diff = Collect[ex1 - ex2, _basis, If[ProbablyZeroQ[#],0,Coeff[#]]&];

@@ -1,0 +1,22 @@
+jobs:
+ - reduce_user_defined_system:
+    input_system:
+     config: false
+     otf: false
+     files:
+      - "input_kira/basis/"
+    select_integrals:
+     select_mandatory_list:
+      - ["integrals"]
+#% if p.preferred_masters:
+    preferred_masters: "preferred-masters"
+#% pass
+    run_symmetries: false
+    run_initiate: true
+    run_triangular: true
+    run_back_substitution: true
+    run_firefly: true
+ - kira2math:
+    target:
+      - [basis, "integrals"]
+    reconstruct_mass: false

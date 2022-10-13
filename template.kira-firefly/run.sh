@@ -1,6 +1,6 @@
 #!/bin/sh
 
-rm -rf results/ sectormappings/ tmp/ kira.log
+rm -rf ff_save/ firefly_saves/ results/ sectormappings/ tmp/ kira.log
 
 kira --parallel={p.threads} jobs.yaml
 

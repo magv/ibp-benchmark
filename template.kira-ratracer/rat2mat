@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+import sys
+import re
+
+values = {{}}
+item = master = None
+for line in sys.stdin:
+    m = re.match(r"CO\[([^]]+\]),([^]]+\])\] =\s*", line)
+    if m is not None:
+        item = m.group(1)
+        master = m.group(2)
+    else:
+        values.setdefault(item, [])
+        values[item].append((master, line.strip().rstrip(";")))
+        
+print("{{")
+for i, (item, value) in enumerate(sorted(values.items())):
+    if i != 0: print(",")
+    print(item, "->")
+    for master, coef in value:
+        print(f" + {{master}}*({{coef}})")
+print("}}")

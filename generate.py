@@ -86,6 +86,12 @@ class Problem:
             default=0)
 
     @property
+    def maxd(self):
+        return max(
+            (sum(i-1 for i in indices if i > 0) for indices in self.integrals),
+            default=0)
+
+    @property
     def top_sector_id(self):
         return sum(2**i for i in range(len(self.denominators)))
 
@@ -137,6 +143,7 @@ def _template_fn({", ".join(str(k) for k in kwargs.keys())}):
     return variables["_template_fn"](**kwargs)
 
 def format_template_dir(srcdir, dstdir, **kwargs):
+    assert os.path.isdir(srcdir)
     for root, dirs, files in os.walk(srcdir):
         for file in files:
             src = os.path.join(root, file)
@@ -149,6 +156,8 @@ def format_template_dir(srcdir, dstdir, **kwargs):
             with open(dst, "w") as f:
                 f.write(data)
             os.chmod(dst, os.stat(src).st_mode)
+
+templates = ["kira", "kira-firefly", "kira-firefly-uds", "kira-ratracer", "fire", "fire-nohint"]
 
 # one loop box with massive internal lines (same mass)
 # and massless external legs
@@ -173,13 +182,11 @@ problem = Problem(
     ],
     integrals = all_indices(4, rmax=10, smax=5, dmax=5),
     top_sector = (1,1,1,1),
-    threads = 16
+    threads = 8
 )
 
-format_template_dir("template.kira", "box1L.kira", p=problem)
-format_template_dir("template.kira-firefly", "box1L.kira-firefly", p=problem)
-format_template_dir("template.fire", "box1L.fire", p=problem)
-format_template_dir("template.fire-nohint", "box1L.fire-nohint", p=problem)
+for t in templates:
+    format_template_dir(f"template.{t}", f"box1L.{t}", p=problem)
 
 # ttH b16
 extraintegrals = [
@@ -244,12 +251,10 @@ problem = Problem(
         ("l2 + q1", "0"),
         ("l2 + p2", "0")
     ],
-    integrals = extraintegrals + all_indices(6, rmax=7, smax=1, dmax=1, sector=(1,0,1,1,1,0,1,1,0,0,0)),
+    integrals = extraintegrals + all_indices(6, rmax=7, smax=1, dmax=2, sector=(1,0,1,1,1,0,1,1,0,0,0)),
     top_sector = (1,0,1,1,1,0,1,1,0,0,0),
-    threads = 16
+    threads = 8
 )
 
-format_template_dir("template.kira", "tth_b16.kira", p=problem)
-format_template_dir("template.kira-firefly", "tth_b16.kira-firefly", p=problem)
-format_template_dir("template.fire", "tth_b16.fire", p=problem)
-format_template_dir("template.fire-nohint", "tth_b16.fire-nohint", p=problem)
+for t in templates:
+    format_template_dir(f"template.{t}", f"tth_b16.{t}", p=problem)
