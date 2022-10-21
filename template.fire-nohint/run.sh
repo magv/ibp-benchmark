@@ -15,11 +15,11 @@ fi
 rm -f *.start *.lbases *.sbases
 rm -rf litered
 
-$MATH -script step1.m || exit 1
-$MATH -script step2.m || exit 1
-$MATH -script step3.m || exit 1
+/usr/bin/time $MATH -script step1.m || exit 1
+/usr/bin/time $MATH -script step2.m || exit 1
+/usr/bin/time $MATH -script step3.m || exit 1
 
 mkdir fire.hintdir
-$FIREPATH/bin/FIRE6 -c fire || exit 1
+/usr/bin/time $FIREPATH/bin/FIRE6 -c fire || exit 1
 
-$MATH -script step4.m || exit 1
+/usr/bin/time $MATH -script step4.m || exit 1
