@@ -107,6 +107,7 @@ if __name__ == "__main__":
     proc = subprocess.Popen(args)
     p = psutil.Process(proc.pid)
     ctime0 = p.create_time()
+    children = set()
     with open(outfile, "w", 8*1024) as outf:
         outf.write("{\n")
         outf.write(f" \"command\": {json.dumps(args)},\n")
@@ -121,6 +122,7 @@ if __name__ == "__main__":
                 stat.append(measure(p, ctime0))
                 for c in p.children(recursive=True):
                     try:
+                        children.add((p.pid, p.create_time()))
                         stat.append(measure(c, ctime0))
                     except psutil.AccessDenied:
                         #print("comon: No access to a child process; it probably finished", file=sys.stderr)
@@ -146,4 +148,15 @@ if __name__ == "__main__":
         outf.write(f" \"exitcode\": {proc.returncode},\n")
         outf.write(f" \"time\": {duration}\n")
         outf.write("}\n")
+        for pid, ct in children:
+            try:
+                p = psutil.Process(pid)
+                if p.create_time() == ct:
+                    print(f"comon: Child {pid} is still alive; will try to kill it", file=sys.stderr)
+                    p.kill()
+            except psutil.NoSuchProcess:
+                pass
+            except psutil.AccessDenied:
+                print("comon: No access to a child process", file=sys.stderr)
+                pass
         print(f"comon: Exited with code {proc.returncode} in {duration:.1f} seconds", file=sys.stderr)
