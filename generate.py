@@ -185,11 +185,12 @@ def format_template_dir(srcdir, dstdir, **kwargs):
                 f.write(data)
             os.chmod(dst, os.stat(src).st_mode)
 
-templates = ["kira", "kira-firefly", "kira-firefly-uds", "kira-ratracer", "fire", "fire-nohint"]
+templates = ["kira", "kira-firefly", "kira-ratracer", "kira-ratracer-scan", "kira-ratracer-eps0", "kira-ratracer-eps1", "kira-ratracer-eps2", "kira-ratracer-eps0-scan", "kira-ratracer-eps1-scan", "kira-ratracer-eps2-scan", "fire", "fire-nohint"]
 
 # one loop box with massive internal lines (same mass)
 # and massless external legs
 problem = Problem(
+    name = "box1l",
     external_momenta = "p1 p2 p3",
     loop_momenta = "l",
     invariants = {"m2": 2, "s12": 2, "s23": 2},
@@ -204,17 +205,110 @@ problem = Problem(
     ],
     denominators = [
         ("l", "m2"),
-        ("l + p2", "m2"),
-        ("l - p1 - p3", "m2"),
-        ("l - p1", "m2")
+        ("l + p1", "m2"),
+        ("l + p1 + p2", "m2"),
+        ("l - p3", "m2")
     ],
-    integrals = all_indices(4, rmax=10, smax=5, dmax=5),
+    integrals = all_indices(4, rmax=10, smax=6, dmax=6),
     top_sector = (1,1,1,1),
-    threads = 8
+    threads = 8,
+    timeout = "30m"
 )
 
 for t in templates:
-    format_template_dir(f"template.{t}", f"box1L.{t}", p=problem)
+    format_template_dir(f"template.{t}", f"problems/{problem.name}.{t}", p=problem)
+
+# two loop box with massive internal lines (same mass)
+# and massless external legs
+problem = Problem(
+    name = "box2l",
+    external_momenta = "p1 p2 p3",
+    loop_momenta = "l1 l2",
+    invariants = {"m2": 2, "s12": 2, "s23": 2},
+    replace_by_one = "m2",
+    scalar_product_rules = [
+        ("p1", "p1", "0"),
+        ("p2", "p2", "0"),
+        ("p3", "p3", "0"),
+        ("p1", "p2", "s12/2"),
+        ("p1", "p3", "-s12/2-s23/2"),
+        ("p2", "p3", "s23/2")
+    ],
+    denominators = [
+        ("l1", "m2"),
+        ("l2", "m2"),
+        ("l1 - l2", "m2"),
+        ("l1 + p1", "m2"),
+        ("l1 + p1 + p2", "m2"),
+        ("l2 + p1 + p2", "m2"),
+        ("l2 - p3", "m2"),
+        ("l2 + p1", "0"),
+        ("l1 - p3", "0")
+    ],
+    integrals = all_indices(7, rmax=9, smax=2, dmax=2, sector=(1,1,1,1,1,1,1,0,0)),
+    top_sector = (1,1,1,1,1,1,1,0,0),
+    threads = 8,
+    timeout = "4h"
+)
+
+for t in templates:
+    format_template_dir(f"template.{t}", f"problems/{problem.name}.{t}", p=problem)
+
+# two loop massive diamond topology
+problem = Problem(
+    name = "diamond2l",
+    external_momenta = "q",
+    loop_momenta = "l1 l2",
+    invariants = {"s": 2, "ma2": 2, "mb2": 2},
+    replace_by_one = "s",
+    scalar_product_rules = [
+        ("q", "q", "s")
+    ],
+    denominators = [
+        ("l1 - l2", "0"),
+        ("l1", "ma2"),
+        ("l2", "ma2"),
+        ("l1 + q", "mb2"),
+        ("l2 + q", "mb2")
+    ],
+    integrals = all_indices(5, rmax=8, smax=3, dmax=3),
+    top_sector = (1,1,1,1,1),
+    threads = 8,
+    timeout = "30m"
+)
+
+for t in templates:
+    format_template_dir(f"template.{t}", f"problems/{problem.name}.{t}", p=problem)
+
+# three loop massive diamond topology
+problem = Problem(
+    name = "diamond3l",
+    external_momenta = "q",
+    loop_momenta = "l1 l2 l3",
+    invariants = {"s": 2, "ma2": 2, "mb2": 2},
+    replace_by_one = "s",
+    scalar_product_rules = [
+        ("q", "q", "s")
+    ],
+    denominators = [
+        ("l1 - l2", "0"),
+        ("l2 - l3", "0"),
+        ("l1", "ma2"),
+        ("l2", "ma2"),
+        ("l3", "ma2"),
+        ("l1 + q", "mb2"),
+        ("l2 + q", "mb2"),
+        ("l3 + q", "mb2"),
+        ("l1 - l3", "0")
+    ],
+    integrals = all_indices(8, rmax=10, smax=2, dmax=1, sector=(1,1,1,1,1,1,1,1,0)),
+    top_sector = (1,1,1,1,1,1,1,1,0),
+    threads = 8,
+    timeout = "2h"
+)
+
+for t in templates:
+    format_template_dir(f"template.{t}", f"problems/{problem.name}.{t}", p=problem)
 
 # ttH b16
 extraintegrals = [
@@ -250,6 +344,7 @@ extraintegrals = [
 ]
 
 problem = Problem(
+    name = "tth2l_b16",
     external_momenta = "q1 q2 p1 p2",
     loop_momenta = "l1 l2",
     invariants = {"mt2": 2, "mh2": 2, "x12": 2, "x23": 2, "x35": 2, "x41": 2, "x54": 2},
@@ -279,10 +374,47 @@ problem = Problem(
         ("l2 + q1", "0"),
         ("l2 + p2", "0")
     ],
-    integrals = extraintegrals + all_indices(6, rmax=7, smax=1, dmax=2, sector=(1,0,1,1,1,0,1,1,0,0,0)),
+    integrals = all_indices(6, rmax=7, smax=1, dmax=1, sector=(1,0,1,1,1,0,1,1,0,0,0)),
     top_sector = (1,0,1,1,1,0,1,1,0,0,0),
-    threads = 8
+    threads = 8,
+    timeout = "30m"
 )
 
 for t in templates:
-    format_template_dir(f"template.{t}", f"tth_b16.{t}", p=problem)
+    format_template_dir(f"template.{t}", f"problems/{problem.name}.{t}", p=problem)
+
+# non-planar double-box with two masses, qq->tb
+# "topo5" from Kira
+problem = Problem(
+    name = "xbox2l2m",
+    external_momenta = "p1 p2 q2",
+    loop_momenta = "l1 l2",
+    invariants = {"s": 2, "t": 2, "ma2": 2, "mb2": 2},
+    replace_by_one = "ma2",
+    scalar_product_rules = [
+        ("p1", "p1", "0"),
+        ("p1", "p2", "s/2"),
+        ("p1", "q2", "-t/2"),
+        ("p2", "p2", "0"),
+        ("p2", "q2", "-ma2/2 + s/2 + t/2"),
+        ("q2", "q2", "0")
+    ],
+    denominators = [
+        ("l1", "0"),
+        ("l2", "0"),
+        ("q2-l1", "0"),
+        ("p1-l2", "0"),
+        ("p1+p2-q2+l1", "ma2"),
+        ("p1+p2-q2+l1-l2", "ma2"),
+        ("p1-q2+l1-l2", "mb2"),
+        ("l1-p1", "0"),
+        ("l2-q2-p2", "0")
+    ],
+    integrals = all_indices(7, rmax=7, smax=2, dmax=0, sector=(1,1,1,1,1,1,1,0,0)),
+    top_sector = (1,1,1,1,1,1,1,0,0),
+    threads = 8,
+    timeout = "4h"
+)
+
+for t in templates:
+    format_template_dir(f"template.{t}", f"problems/{problem.name}.{t}", p=problem)
