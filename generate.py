@@ -35,6 +35,10 @@ def indices_in_sector(indices, sector):
 assert indices_in_sector([(1,2), (11,22)], (1,0,1,0)) == [(1,0,2,0), (11,0,22,0)]
 
 def all_indices(nindices, rmin=1, rmax=1, smin=0, smax=0, dmin=0, dmax=None, sector=None):
+    if sector is None:
+        sector = (1,)*nindices
+    else:
+        assert(sum(bool(s) for s in sector) == nindices)
     result = []
     def ndots(indices):
         return sum(i-1 for i in indices if i > 1)
@@ -45,15 +49,27 @@ def all_indices(nindices, rmin=1, rmax=1, smin=0, smax=0, dmin=0, dmax=None, sec
             sind = integer_partitions(s, maxsize=nindices)
             sind = [tuple(-i for i in p) for p in sind]
             for i1, i2 in itertools.product(rind, sind):
-                nzeros = nindices - len(i1) - len(i2)
+                nzeros = len(sector) - len(i1) - len(i2)
                 if nzeros < 0: continue
-                for indices in set(itertools.permutations(i1+i2+(0,)*nzeros)):
-                    result.append(indices)
-    if sector:
-        assert(sum(bool(s) for s in sector) == nindices)
-        result = indices_in_sector(result, sector)
+                for p1 in set(itertools.permutations(i1 + (0,)*(nindices - len(i1)))):
+                    for p2 in set(itertools.permutations(i2+(0,)*nzeros)):
+                        indices = []
+                        p1i = p2i = 0
+                        for s in sector:
+                            if s:
+                                if p1[p1i]:
+                                    indices.append(p1[p1i])
+                                else:
+                                    indices.append(p2[p2i])
+                                    p2i += 1
+                                p1i += 1
+                            else:
+                                indices.append(p2[p2i])
+                                p2i += 1
+                        result.append(tuple(indices))
     return sorted(result)
 
+assert len(all_indices(2, rmax=2, smax=1, dmax=0, sector=(1,1,0))) == 8
 assert len(all_indices(4, rmax=6, smax=0)) == 209
 assert len(all_indices(4, rmax=5, smax=0, dmax=1)) == 47
 
