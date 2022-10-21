@@ -73,19 +73,31 @@ assert len(all_indices(2, rmax=2, smax=1, dmax=0, sector=(1,1,0))) == 8
 assert len(all_indices(4, rmax=6, smax=0)) == 209
 assert len(all_indices(4, rmax=5, smax=0, dmax=1)) == 47
 
+def shuffle_sector(items, sector):
+    assert len(items) == len(sector)
+    front = []
+    back = []
+    for i, s in enumerate(sector):
+        (front if s else back).append(i)
+    return [items[i] for i in front + back]
+
+assert shuffle_sector([11,22,33,44,55,66], [1,0,1,1,0,0]) == [11,33,44,22,55,66]
+assert shuffle_sector([11,22,33,44,55], [0,1,0,1,1]) == [22,44,55,11,33]
+
 class Problem:
-    def __init__(self, external_momenta, loop_momenta, invariants, replace_by_one, scalar_product_rules, denominators, integrals, top_sector, preferred_masters=[], threads=1):
+    def __init__(self, name, external_momenta, loop_momenta, invariants, replace_by_one, scalar_product_rules, denominators, integrals, top_sector, preferred_masters=[], threads=1, timeout=None):
         def tolist(obj):
             return obj.split() if isinstance(obj, str) else obj
         assert len(top_sector) == len(denominators)
+        self.name = name
         self.external_momenta = tolist(external_momenta)
         self.loop_momenta = tolist(loop_momenta)
         self.invariants = invariants
         self.replace_by_one = replace_by_one
         self.scalar_product_rules = scalar_product_rules
-        self.denominators = denominators
-        self.integrals = integrals
-        self.top_sector = top_sector
+        self.denominators = shuffle_sector(denominators, top_sector)
+        self.integrals = [shuffle_sector(i, top_sector) for i in integrals]
+        self.top_sector = shuffle_sector(top_sector, top_sector)
         self.preferred_masters = preferred_masters
         self.threads = threads
 
