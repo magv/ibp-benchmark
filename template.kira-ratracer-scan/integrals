@@ -1,0 +1,3 @@
+#% for indices in p.integrals:
+basis[{",".join(str(i) for i in indices)}]
+#% pass

@@ -1,0 +1,11 @@
+integralfamilies:
+  - name: "basis"
+    loop_momenta:
+#% for m in p.loop_momenta:
+      - {m!r}
+#% pass
+    top_level_sectors: [b{"".join("1" if s else "0" for s in p.top_sector)}]
+    propagators:
+#% for mom, m2 in p.denominators:
+      - [{mom!r}, {m2!r}]
+#% pass
