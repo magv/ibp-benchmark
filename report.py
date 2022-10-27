@@ -50,6 +50,7 @@ now = time.time()
 for statfn in glob.glob("problems/*/comon.json"):
     logfn = statfn.replace("/comon.json", "/log")
     if not os.path.exists(logfn): continue
+    ok = os.path.exists(statfn.replace("/comon.json", "/ibp-tables.m"))
     m = re.fullmatch(r"problems/([^.]*)\.([^.]*)/comon.json", statfn)
     problem = m.group(1)
     method = m.group(2)
@@ -85,7 +86,7 @@ for statfn in glob.glob("problems/*/comon.json"):
     table.append([
         problem,
         method,
-        fmt_time(data["time"]),
+        ("" if ok else "!! ") + fmt_time(data["time"]),
         fmt_time(firefly_time) if firefly_time else "--",
         fmt_time(firefly_probetime) if firefly_probetime else "--",
         fmt_time(ratracer_probetime) if ratracer_probetime else "--",
