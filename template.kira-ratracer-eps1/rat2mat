@@ -5,7 +5,7 @@ import re
 values = {{}}
 item = master = None
 for line in sys.stdin:
-    m = re.match(r"CO\[([^]]+\]),([^]]+\])\] =\s*", line)
+    m = re.match(r"CO\[([^]]+\]),([^]]+\]|[^,\]]*@[^,\]]*)\] =\s*", line)
     if m is not None:
         item = m.group(1)
         master = m.group(2)

@@ -1,0 +1,5 @@
+#% for i, indices in enumerate(p.preferred_masters):
+master@{i}*1
+basis[{",".join(str(i) for i in indices)}]*-1
+
+#% pass

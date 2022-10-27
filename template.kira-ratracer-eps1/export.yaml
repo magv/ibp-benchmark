@@ -5,10 +5,6 @@ jobs:
     select_integrals:
      select_mandatory_list:
       - [basis, "integrals"]
-#% if p.preferred_masters:
-    preferred_masters: "preferred-masters"
-#% pass
-    integral_ordering: 8
     run_symmetries: true
     run_initiate: input
     run_triangular: false
