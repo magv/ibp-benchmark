@@ -17,7 +17,7 @@ for dir in "$@"; do
     tmpdir=$(mktemp -d)
     echo "# measuring directory: $dir"
     cp -a "$dir/." "$tmpdir"
-    env TMP="$tmpdir" TMPDIR="$tmpdir" ./comon -C "$tmpdir" -t 2 -d . -o "comon.json" timeout -v 2h ./run.sh 2>&1 | tee "$tmpdir/log"
+    env TMP="$tmpdir" TMPDIR="$tmpdir" ./comon -C "$tmpdir" -t 2 -d . -o "comon.json" timeout -v 5h ./run.sh 2>&1 | tee "$tmpdir/log"
     cp -a "$tmpdir/comon.json" "$dir/"
     cp -a "$tmpdir/ibp-tables.m" "$dir/"
     cp -a "$tmpdir/log" "$dir/"
