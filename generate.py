@@ -35,37 +35,25 @@ def indices_in_sector(indices, sector):
 
 assert indices_in_sector([(1,2), (11,22)], (1,0,1,0)) == [(1,0,2,0), (11,0,22,0)]
 
+def gen_all_indices(sector, rmin, rmax, smin, smax, dmin, dmax):
+    if sector == ():
+        if (rmin <= 0 <= rmax) and (smin <= 0 <= smax) and (dmin <= 0 <= dmax):
+            yield ()
+        return
+    if rmax < 0 or smax < 0 or dmax < 0: return
+    indices = []
+    if sector[0]:
+        for i in range(1, rmax + 1):
+            d = max(i - 1, 0)
+            for p in gen_all_indices(sector[1:], rmin-i, rmax-i, smin, smax, dmin-d, dmax-d):
+                yield (i,) + p
+    for i in range(0, smax + 1):
+        for p in gen_all_indices(sector[1:], rmin, rmax, smin-i, smax-i, dmin, dmax):
+            yield (-i,) + p
+
 def all_indices(sector, rmin=1, rmax=1, smin=0, smax=0, dmin=0, dmax=None):
-    nindices = sum(bool(s) for s in sector)
-    result = []
-    def ndots(indices):
-        return sum(i-1 for i in indices if i > 1)
     if dmax is None: dmax = rmax - 1
-    for r in range(rmin, rmax+1):
-        rind = list(p for p in integer_partitions(r, maxsize=nindices) if dmin <= ndots(p) <= dmax)
-        for s in range(smin, smax+1):
-            sind = integer_partitions(s, maxsize=nindices)
-            sind = [tuple(-i for i in p) for p in sind]
-            for i1, i2 in itertools.product(rind, sind):
-                nzeros = len(sector) - len(i1) - len(i2)
-                if nzeros < 0: continue
-                for p1 in set(itertools.permutations(i1 + (0,)*(nindices - len(i1)))):
-                    for p2 in set(itertools.permutations(i2+(0,)*nzeros)):
-                        indices = []
-                        p1i = p2i = 0
-                        for s in sector:
-                            if s:
-                                if p1[p1i]:
-                                    indices.append(p1[p1i])
-                                else:
-                                    indices.append(p2[p2i])
-                                    p2i += 1
-                                p1i += 1
-                            else:
-                                indices.append(p2[p2i])
-                                p2i += 1
-                        result.append(tuple(indices))
-    return sorted(result)
+    return sorted(list(gen_all_indices(sector, rmin, rmax, smin, smax, dmin, dmax)))
 
 assert len(all_indices((1,1,0), rmax=2, smax=1, dmax=0)) == 8
 assert len(all_indices((1,1,1,1), rmax=6, smax=0)) == 209
